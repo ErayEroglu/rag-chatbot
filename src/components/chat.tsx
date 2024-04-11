@@ -1,26 +1,56 @@
-'use client'
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
+"use client";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { useChat } from "ai/react";
 import { useState } from "react";
+import axios from "axios";
+
 
 export function Chat() {
-  const [conversation, setConversation] = useState<string[]>([]);
-  const [messageInput, setMessageInput] = useState<string>('');
+  const { input, handleInputChange, handleSubmit, messages } = useChat();
+  const [file, setFile] = useState<File | null>(null);
+  const [msg, setMsg] = useState("");
 
-  const handleMessageSend = () => {
-    if (messageInput.trim() !== '') {
-      setConversation(prevConversation => [...prevConversation, `User:\n`, messageInput]);
-      setMessageInput('');
+  function handleUpload() {
+    if (file) {
+      
+      const formData = new FormData();
+      formData.append("file", file);
+      setMsg("Uploading...");
+
+      axios
+        .post("http://httpbin.org/post", formData, {
+          headers: {
+            "Custom-Header": "value",
+          },
+        })
+
+        .then((response: any) => {
+          setMsg("File uploaded succesfully");
+          console.log(response.data);
+        })
+        .catch((error: any) => {
+          setMsg("Error while uploading file");
+          console.log(error);
+        });
+    } else {
+      console.log("No file selected");
+    }
+  }
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = event.target.files;
+
+    if (files && files.length > 0) {
+      const selectedPdf = files[0];
+      setFile(selectedPdf); 
     }
   };
 
-  // Function to send system messages
-  const sendSystemMessage = (message: string) => {
-    setConversation(prevConversation => [...prevConversation, message]);
-  };
-
+  const isFileUploaded = file !== null;
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <div className="grid w-full max-w-3xl px-4 gap-4">
@@ -31,12 +61,24 @@ export function Chat() {
           </div>
         </div>
         <div className="grid gap-4">
-          <p className="text-lg font-semibold text-center">Welcome to the PDF CHAT, please add your PDF file.</p>
+          <p className="text-lg font-semibold text-center">
+            Welcome to the PDF CHAT, please add your PDF file.
+          </p>
           <div className="grid gap-1.5">
             <Label className="leading-none" htmlFor="upload">
               Select a PDF to upload
             </Label>
-            <Input accept=".pdf" id="upload" type="file" />
+            <Input
+              accept=".pdf"
+              id="upload"
+              type="file"
+              onChange={handleFileChange}
+            />
+            <Button 
+            disabled={!isFileUploaded}
+            type="button" onClick={handleUpload}>Upload
+            </Button>
+            {msg && <span>{msg}</span>}
           </div>
         </div>
         <div className="grid gap-4">
@@ -45,8 +87,8 @@ export function Chat() {
               Conversation
             </Label>
             <div className="border p-4 rounded-lg h-48 overflow-y-auto">
-              {conversation.map((message, index) => (
-                <p key={index}>{message}</p>
+              {messages.map((message, index) => (
+                <p key={index}>{message.content}</p>
               ))}
             </div>
           </div>
@@ -56,16 +98,21 @@ export function Chat() {
             </Label>
             <Textarea
               id="message"
-              onChange={(e) => setMessageInput(e.target.value)}
+              onChange={handleInputChange}
               placeholder="Type your message"
-              value={messageInput}
+              value={input}
+              disabled={!isFileUploaded}
             />
           </div>
-          <Button onClick={handleMessageSend}>Send</Button>
+          <form onSubmit={handleSubmit}>
+            <Button type="submit" disabled={!isFileUploaded}>
+              Send
+            </Button>{" "}
+          </form>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function TextIcon(props: any) {
@@ -86,5 +133,5 @@ function TextIcon(props: any) {
       <path d="M21 12.1H3" />
       <path d="M15.1 18H3" />
     </svg>
-  )
+  );
 }
