@@ -18,9 +18,10 @@ export function Chat() {
       formData.append("file", file);
       const response = await fetch("/api/chat", {
         method: "POST",
-        headers: {
-        },
         body: formData,
+        headers: {
+          "req-type": "fileUpload",
+        },
       });
       if (response.ok) {
         setMsg("File uploaded successfully");
