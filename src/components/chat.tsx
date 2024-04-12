@@ -5,40 +5,34 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useChat } from "ai/react";
 import { useState } from "react";
-import axios from "axios";
-
 
 export function Chat() {
   const { input, handleInputChange, handleSubmit, messages } = useChat();
   const [file, setFile] = useState<File | null>(null);
   const [msg, setMsg] = useState("");
 
-  function handleUpload() {
+  async function handleUpload() {
     if (file) {
-      
-      const formData = new FormData();
-      formData.append("file", file);
       setMsg("Uploading...");
-
-      axios
-        .post("http://httpbin.org/post", formData, {
-          headers: {
-            "Custom-Header": "value",
-          },
-        })
-
-        .then((response: any) => {
-          setMsg("File uploaded succesfully");
-          console.log(response.data);
-        })
-        .catch((error: any) => {
-          setMsg("Error while uploading file");
-          console.log(error);
-        });
+      const formData = new FormData(); 
+      formData.append("file", file);
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+        },
+        body: formData,
+      });
+      if (response.ok) {
+        setMsg("File uploaded successfully");
+      } else {
+        setMsg("Error while uploading file");
+        console.log("Error:", response.status);
+      }
     } else {
       console.log("No file selected");
     }
   }
+
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -46,7 +40,7 @@ export function Chat() {
 
     if (files && files.length > 0) {
       const selectedPdf = files[0];
-      setFile(selectedPdf); 
+      setFile(selectedPdf);
     }
   };
 
@@ -74,9 +68,12 @@ export function Chat() {
               type="file"
               onChange={handleFileChange}
             />
-            <Button 
-            disabled={!isFileUploaded}
-            type="button" onClick={handleUpload}>Upload
+            <Button
+              disabled={!isFileUploaded}
+              type="button"
+              onClick={handleUpload}
+            >
+              Upload
             </Button>
             {msg && <span>{msg}</span>}
           </div>
