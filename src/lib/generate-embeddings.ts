@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { Index } from "@upstash/vector";
-import { getChunkedDocsFromPDF } from "./pdf-splitter";
+import { getChunkedDocsFromPDF } from "../pages/api/pdf-extractor";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
