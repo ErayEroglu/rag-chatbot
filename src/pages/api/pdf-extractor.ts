@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { generateResults } from "./generate-embeddings"
 
-const pdf = require('pdf-parse');
+const pdf = require('pdf-parse'); 
 
 export default async function handler(
   req: NextApiRequest,
@@ -9,6 +10,7 @@ export default async function handler(
   if (req.method === "POST") {
     const data = req.body.data;
     const text = await extractTextFromPDF(data);
+    console.log(await generateResults(text, "What is the most important topic of the file?"));
     res.status(200).json({ text: text });
   } else {
     res.status(405).json({ error: `Method '${req.method}' Not Allowed` });
@@ -24,6 +26,5 @@ async function extractTextFromPDF(data: number[]): Promise<string> {
   // also add number check to this pdfText = pdfText.replace(/[^\p{L}]/gu, ' ');
   pdfText = pdfText.replace(/[^\p{L}\p{N}]/gu, ' ');
   pdfText = pdfText.replace(/\s+/g, ' ').trim();
-  console.log(pdfText);
   return pdfText;
 }
