@@ -1,15 +1,15 @@
 import OpenAI from "openai";
 import { Index } from "@upstash/vector";
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter"
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-const index = new Index({
+export const index = new Index({
     url: process.env.UPSTASH_VECTOR_REST_URL,
     token: process.env.UPSTASH_VECTOR_REST_TOKEN,
-});
+  });
 
 async function getChunksFromPDF(text: string) {
     const textSplitter = new RecursiveCharacterTextSplitter({
@@ -20,7 +20,7 @@ async function getChunksFromPDF(text: string) {
     return chunks;
 }
 
-async function generateEmbedding(text: string) {
+export async function generateEmbedding(text: string) {
     const response = await openai.embeddings.create({
         model: 'text-embedding-3-large',
         input: text,
@@ -34,36 +34,35 @@ async function generateEmbedding(text: string) {
     }
 }
 
-async function uploadEmbeddings(text : string) {
+export async function uploadEmbeddings(text : string, vectorDB : Index) {
     const chunks = await getChunksFromPDF(text);
     for (let i = 0; i < chunks.length; i++) {
         const chunk = chunks[i];
         const embedding = await generateEmbedding(chunk);
-        await index.upsert({
+        await vectorDB.upsert({
             id: `${i}`,
             vector: embedding,
-            metadata: { text: chunk}
+            metadata: { text: chunk }
         });
     }
 }
 
-async function createQuery(text : string ,question : string, maxK : number) {
-    await uploadEmbeddings(text);
+async function createQuery(question : string, maxK : number, vectorDB : Index) {
     const embedding = await generateEmbedding(question);
     try {
-        const results = await index.query({
+        const results = await vectorDB.query({
             vector: embedding,
             topK: maxK,
             includeMetadata: true,
         });
     return results;
     } catch (e) {
-        throw new Error('Error creating query');
+        console.error(e);
     }
 }
 
-export async function generateResults(text : string, query : string) {
-    const results = await createQuery(text,query,3)
+export async function generateResults(query : string, vectorDB : Index) {
+    const results = await createQuery(query,3,vectorDB);
     const chatCompletion = await openai.chat.completions.create({
         messages: [
             {

@@ -7,26 +7,20 @@ import { useChat } from "ai/react";
 import { useState } from "react";
 
 export function Chat() {
-  const { input, handleInputChange, handleSubmit, messages } = useChat();
+  const { input, handleInputChange, messages } = useChat();
   const [msg, setMsg] = useState("");
-
   const [fileUrl, setFileUrl] = useState<string>("");
+  const [isFileUploaded, setIsFileUploaded] = useState<boolean>(false);
 
   async function handleUpload() {
-    if (fileUrl) {
+    if (fileUrl && !isFileUploaded) {
       setMsg("Uploading...");
 
-      // Convert the Blob URL to a Blob object
       const responseToBlob = await fetch(fileUrl);
       const blob = await responseToBlob.blob();
-
-      // Read the Blob object as an ArrayBuffer
       const arrayBuffer = await new Response(blob).arrayBuffer();
-
-      // Convert the ArrayBuffer to a Uint8Array
       const uint8Array = new Uint8Array(arrayBuffer);
 
-      // Send the Uint8Array to the server
       const response = await fetch("/api/pdf-extractor", {
         method: "POST",
         body: JSON.stringify({ data: Array.from(uint8Array) }), // Convert the Uint8Array to a regular array
@@ -37,7 +31,7 @@ export function Chat() {
       });
 
       if (response.ok) {
-        const result = await response.json();
+        setIsFileUploaded(true);
         setMsg("File uploaded successfully ");
       } else {
         setMsg("Error while uploading file");
@@ -48,15 +42,38 @@ export function Chat() {
     }
   }
 
-  async function chat(text: string) {
-    await fetch("/api/chat", {
-      method: "POST",
-      body: JSON.stringify({ messages: [{ role: "user", content: text }] }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  }
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!isFileUploaded) return; // Check if file is uploaded
+
+    const payload = {
+        messages: [
+            ...messages, // Include message history
+            { role: 'user', content: input } // Include user's message
+        ],
+    };
+    try {
+        setMsg("Sending message...");   
+        const response = await fetch("/api/chat", {
+            method: "POST",
+            body: JSON.stringify(payload),
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log("Response at the end:", result);
+        } else {
+            setMsg("Error sending message ");
+            console.log("Error:", response.status);
+        }
+    } catch (error) {
+        console.error("Error sending message before sending backend:", error);
+        setMsg("Error sending message");
+    }
+}
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -69,7 +86,7 @@ export function Chat() {
     }
   };
 
-  const isFileUploaded = !!fileUrl;
+
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <div className="grid w-full max-w-3xl px-4 gap-4">
@@ -94,7 +111,7 @@ export function Chat() {
               onChange={handleFileChange}
             />
             <Button
-              disabled={!isFileUploaded}
+              disabled={!fileUrl}
               type="button"
               onClick={handleUpload}
             >
