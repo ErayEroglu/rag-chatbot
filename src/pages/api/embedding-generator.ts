@@ -61,22 +61,21 @@ async function createQuery(question : string, maxK : number, vectorDB : Index) {
     }
 }
 
-export async function generateResults(query : string, vectorDB : Index) {
+export async function generateResults(vectorDB : Index, messageHistory: { role: "system" | "user" , content: string }[], length: number) {
+    const query = messageHistory.filter(message => message.role === 'user').slice(-3).map(message => message.content).join('\n');
     const results = await createQuery(query,3,vectorDB);
     const chatCompletion = await openai.chat.completions.create({
         messages: [
-            {
-                role: 'system',
-                content: 'You are a RAG Chatbot. Respond to the query with the most relevant information from the top results.',
-            },
-
+            ...messageHistory,
             {
                 role: 'user',
-                content: `Query : ${query}. Top results : ${JSON.stringify(results)}`,
+                content: `By considiring the conversation history and following information :
+                ${JSON.stringify(results)} 
+                Answer the following question:
+                ${messageHistory[length-1].content}`,
             },
         ],
         model: 'gpt-3.5-turbo', 
     });
     return chatCompletion.choices[0].message.content;
 }
-

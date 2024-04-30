@@ -7,10 +7,15 @@ import { useChat } from "ai/react";
 import { useState } from "react";
 
 export function Chat() {
-  const { input, handleInputChange, messages } = useChat();
+  const [input, setInput] = useState('');
+  const [responses, setResponses] = useState<{ role: string; content: any }[]>([]);
   const [msg, setMsg] = useState("");
   const [fileUrl, setFileUrl] = useState<string>("");
   const [isFileUploaded, setIsFileUploaded] = useState<boolean>(false);
+
+  const handleInputChange = (event : React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(event.target.value);
+  };
 
   async function handleUpload() {
     if (fileUrl && !isFileUploaded) {
@@ -45,35 +50,48 @@ export function Chat() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!isFileUploaded) return; // Check if file is uploaded
-
+  
     const payload = {
-        messages: [
-            ...messages, // Include message history
-            { role: 'user', content: input } // Include user's message
-        ],
+      messages: [
+        ...responses, // Include message history
+        { role: "user", content: input }, // Include user's message
+      ],
     };
-    try {
-        setMsg("Sending message...");   
-        const response = await fetch("/api/chat", {
-            method: "POST",
-            body: JSON.stringify(payload),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
 
-        if (response.ok) {
-            const result = await response.json();
-            console.log("Response at the end:", result);
-        } else {
-            setMsg("Error sending message ");
-            console.log("Error:", response.status);
-        }
+    setResponses((prevResponses) => [
+      ...prevResponses,
+      { role: "user", content: input },
+    ]);
+
+    try {
+      setMsg("Sending message...");
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Response from backend is fetched");
+        setResponses((prevResponses) => [
+          ...prevResponses,
+          { role: "system", content: result },
+        ]);
+        setInput("");
+        setMsg("");
+        console.log(responses);
+      } else {
+        setMsg("Error sending message ");
+        console.log("Error:", response.status);
+      }
     } catch (error) {
-        console.error("Error sending message before sending backend:", error);
-        setMsg("Error sending message");
+      console.error("Error sending message before sending backend:", error);
+      setMsg("Error sending message");
     }
-}
+  }
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -85,7 +103,6 @@ export function Chat() {
       setFileUrl(URL.createObjectURL(selectedPdf));
     }
   };
-
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
@@ -110,11 +127,7 @@ export function Chat() {
               type="file"
               onChange={handleFileChange}
             />
-            <Button
-              disabled={!fileUrl}
-              type="button"
-              onClick={handleUpload}
-            >
+            <Button disabled={!fileUrl} type="button" onClick={handleUpload}>
               Upload
             </Button>
             {msg && <span>{msg}</span>}
@@ -126,7 +139,7 @@ export function Chat() {
               Conversation
             </Label>
             <div className="border p-4 rounded-lg h-48 overflow-y-auto">
-              {messages.map((message, index) => (
+              {responses.map((message, index) => (
                 <p key={index}>{message.content}</p>
               ))}
             </div>
