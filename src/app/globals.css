@@ -31,3 +31,33 @@ body {
     text-wrap: balance;
   }
 }
+
+.chat-bubble {
+  display: flex;
+  justify-content: flex-end; /* Align user messages to the left */
+  margin-bottom: 10px;
+}
+
+.system-message {
+  justify-content: flex-start; /* Align system messages to the right */
+}
+
+.chat-content {
+  max-width: 80%;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.system-message .chat-content {
+  background-color: #c824bd; 
+}
+
+.user-message .chat-content {
+  background-color: #207bc1; 
+}
+
+.upload-button {
+  font-size: 0.875rem; 
+  padding: 0.5rem 1rem;
+  width: 100px;
+}

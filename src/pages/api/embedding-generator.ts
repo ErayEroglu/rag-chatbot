@@ -20,7 +20,7 @@ async function getChunksFromPDF(text: string) {
     return chunks;
 }
 
-export async function generateEmbedding(text: string) {
+async function generateEmbedding(text: string) {
     const response = await openai.embeddings.create({
         model: 'text-embedding-3-large',
         input: text,

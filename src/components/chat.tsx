@@ -3,17 +3,19 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useChat } from "ai/react";
 import { useState } from "react";
+import "@/app/globals.css";
 
 export function Chat() {
-  const [input, setInput] = useState('');
-  const [responses, setResponses] = useState<{ role: string; content: any }[]>([]);
+  const [input, setInput] = useState("");
+  const [responses, setResponses] = useState<{ role: string; content: any }[]>(
+    []
+  );
   const [msg, setMsg] = useState("");
   const [fileUrl, setFileUrl] = useState<string>("");
   const [isFileUploaded, setIsFileUploaded] = useState<boolean>(false);
 
-  const handleInputChange = (event : React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(event.target.value);
   };
 
@@ -28,7 +30,7 @@ export function Chat() {
 
       const response = await fetch("/api/pdf-extractor", {
         method: "POST",
-        body: JSON.stringify({ data: Array.from(uint8Array) }), // Convert the Uint8Array to a regular array
+        body: JSON.stringify({ data: Array.from(uint8Array) }),
         headers: {
           "Content-Type": "application/json",
           "req-type": "fileUpload",
@@ -37,6 +39,10 @@ export function Chat() {
 
       if (response.ok) {
         setIsFileUploaded(true);
+        setResponses((prevResponses) => [
+          ...prevResponses,
+          { role: "system", content: "Hi, how can I help you today?" },
+        ]);
         setMsg("File uploaded successfully ");
       } else {
         setMsg("Error while uploading file");
@@ -50,7 +56,7 @@ export function Chat() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!isFileUploaded) return; // Check if file is uploaded
-  
+
     const payload = {
       messages: [
         ...responses, // Include message history
@@ -63,8 +69,14 @@ export function Chat() {
       { role: "user", content: input },
     ]);
 
+    if (isFileUploaded) {
+      setResponses((prevResponses) => [
+        ...prevResponses,
+        { role: "system", content: "..." },
+      ]);
+    }
+
     try {
-      setMsg("Sending message...");
       const response = await fetch("/api/chat", {
         method: "POST",
         body: JSON.stringify(payload),
@@ -72,15 +84,14 @@ export function Chat() {
           "Content-Type": "application/json",
         },
       });
-
+      setInput("");
       if (response.ok) {
         const result = await response.json();
         console.log("Response from backend is fetched");
         setResponses((prevResponses) => [
-          ...prevResponses,
+          ...prevResponses.slice(0, -1),
           { role: "system", content: result },
         ]);
-        setInput("");
         setMsg("");
         console.log(responses);
       } else {
@@ -104,6 +115,14 @@ export function Chat() {
     }
   };
 
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleSubmit(event as any);
+      setInput("");
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <div className="grid w-full max-w-3xl px-4 gap-4">
@@ -114,25 +133,32 @@ export function Chat() {
           </div>
         </div>
         <div className="grid gap-4">
-          <p className="text-lg font-semibold text-center">
-            Welcome to the PDF CHAT, please add your PDF file.
-          </p>
           <div className="grid gap-1.5">
             <Label className="leading-none" htmlFor="upload">
               Select a PDF to upload
             </Label>
-            <Input
-              accept=".pdf"
-              id="upload"
-              type="file"
-              onChange={handleFileChange}
-            />
-            <Button disabled={!fileUrl} type="button" onClick={handleUpload}>
-              Upload
-            </Button>
+            <div className="flex items-center gap-4">
+              {" "}
+              <Input
+                accept=".pdf"
+                id="upload"
+                type="file"
+                onChange={handleFileChange}
+                className="max"
+              />
+              <Button
+                className="upload-button"
+                disabled={!fileUrl}
+                type="button"
+                onClick={handleUpload}
+              >
+                Upload
+              </Button>
+            </div>
             {msg && <span>{msg}</span>}
           </div>
         </div>
+
         <div className="grid gap-4">
           <div className="grid gap-1.5">
             <Label className="leading-none" htmlFor="conversation">
@@ -140,27 +166,36 @@ export function Chat() {
             </Label>
             <div className="border p-4 rounded-lg h-48 overflow-y-auto">
               {responses.map((message, index) => (
-                <p key={index}>{message.content}</p>
+                <div
+                  key={index}
+                  className={`chat-bubble ${
+                    message.role === "user" ? "user-message" : "system-message"
+                  }`}
+                >
+                  <div className="chat-content">
+                    <p className="message">{message.content}</p>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
           <div className="grid gap-1.5">
-            <Label className="leading-none" htmlFor="message">
-              Type your message
-            </Label>
             <Textarea
               id="message"
               onChange={handleInputChange}
+              onKeyPress={handleKeyPress}
               placeholder="Type your message"
               value={input}
               disabled={!isFileUploaded}
             />
           </div>
-          <form onSubmit={handleSubmit}>
-            <Button type="submit" disabled={!isFileUploaded}>
-              Send
-            </Button>{" "}
-          </form>
+          <div className="flex justify-center">
+            <form onSubmit={handleSubmit}>
+              <Button type="submit" disabled={!isFileUploaded}>
+                Send
+              </Button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
