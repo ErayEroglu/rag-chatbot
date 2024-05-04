@@ -88,10 +88,11 @@ export function Chat() {
       if (response.ok) {
         const result = await response.json();
         console.log("Response from backend is fetched");
-        setResponses((prevResponses) => [
-          ...prevResponses.slice(0, -1),
-          { role: "system", content: result },
-        ]);
+        setResponses((prevResponses) => {
+          const updatedResponses = [...prevResponses];
+          updatedResponses.pop(); // Remove the last message
+          return [...updatedResponses, { role: "system", content: result }];
+        });
         setMsg("");
         console.log(responses);
       } else {

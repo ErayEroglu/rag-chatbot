@@ -69,10 +69,8 @@ export async function generateResults(vectorDB : Index, messageHistory: { role: 
             ...messageHistory,
             {
                 role: 'user',
-                content: `By considiring the conversation history and following information :
-                ${JSON.stringify(results)} 
-                Answer the following question:
-                ${messageHistory[length-1].content}`,
+                content: `Generate an answer for the following prompt: ${messageHistory[length-1].content} \n
+                by using the following information : ${JSON.stringify(results)}. `,
             },
         ],
         model: 'gpt-3.5-turbo', 
