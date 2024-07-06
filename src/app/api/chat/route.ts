@@ -1,17 +1,15 @@
-import { generateResults, index} from '@/pages/api/embedding-generator';
-
-export const runtime = "edge";
+import { aiUseChatAdapter } from '@upstash/rag-chat/nextjs'
+import { ragChat } from '@/utils/rag-chat'
 
 export async function POST(req: Request) {
-  try {
-    console.log("Request received");
-    const body = await req.json();
-    const messages = body.messages;
-    const length = messages.length;
-    const results = await generateResults(index, messages, length); 
-    return new Response(JSON.stringify(results), { status: 200 });
-  } catch (error) {
-    console.error("OpeanAI API error :", error);
-    return new Response("OpeanAI API error", { status: 500 });
-  }
+    try {
+        console.log('Request received')
+        const { messages } = await req.json()
+        const lastMessage = messages[messages.length - 1].content
+        const response = await ragChat.chat(lastMessage, { streaming: true })
+        return aiUseChatAdapter(response)
+    } catch (error) {
+        console.error('OpeanAI API error :', error)
+        return new Response('OpeanAI API error', { status: 500 })
+    }
 }
