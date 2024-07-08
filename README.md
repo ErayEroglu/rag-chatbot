@@ -55,4 +55,3 @@ npm run dev
 1. Open your browser and go to http://localhost:3000.
 2. Upload a PDF file.
 3. Start chatting with the bot using the extracted content from the PDF.
-
