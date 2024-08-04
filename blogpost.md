@@ -105,7 +105,7 @@ const { messages, input, handleInputChange, handleSubmit, setMessages } =
  })
 ```
 
-2 - This function sets the file URL. It will be used in file upload and text extraction.
+2 - This function sets the file url. It will be used in file upload and text extraction.
 ```typescript
 const handleFileChange = async (
  event: React.ChangeEvent<HTMLInputElement>
@@ -117,13 +117,13 @@ const handleFileChange = async (
  setFileUrl(URL.createObjectURL(selectedPdf))
  }
  }
-```
+ ```
 3- This function is the most important one. It handles the file upload and sends the file to the `/api/pdf-extractor` endpoint. After getting the response, it sets the file uploading flag to true and creates a default message for the chatbot. If anything unusual happens, the corresponding error message is shown to the user.
 ```typescript
  async function handleUpload() {
  if (fileUrl && !isFileUploaded) {
  setMsg('Uploading...')
-
+ 
  // Fetch the file and extract the text
  const responseToBlob = await fetch(fileUrl)
  const blob = await responseToBlob.blob()
@@ -156,9 +156,9 @@ const handleFileChange = async (
  } else {
  console.log('No file selected')
  }
-}
+ }
 ```
-4- The last part is mostly about UI. It is not a complex design, yet it is effective and useful.
+4- The last part is mostly about UI. It is not a complex design, yet it is effective and useful. 
 ```typescript
  return (
  <div className="flex flex-col items-center justify-center h-screen">
@@ -238,7 +238,7 @@ const handleFileChange = async (
  </div>
  </div>
  )
-}
+ }
 ```
 
 ## Functionality of Upstash RAGChat
