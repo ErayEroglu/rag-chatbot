@@ -117,7 +117,7 @@ const handleFileChange = async (
  setFileUrl(URL.createObjectURL(selectedPdf))
  }
  }
- ```
+```
 3- This function is the most important one. It handles the file upload and sends the file to the `/api/pdf-extractor` endpoint. After getting the response, it sets the file uploading flag to true and creates a default message for the chatbot. If anything unusual happens, the corresponding error message is shown to the user.
 ```typescript
  async function handleUpload() {
@@ -156,7 +156,7 @@ const handleFileChange = async (
  } else {
  console.log('No file selected')
  }
- }
+}
 ```
 4- The last part is mostly about UI. It is not a complex design, yet it is effective and useful. 
 ```typescript
