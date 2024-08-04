@@ -18,7 +18,7 @@ This project demonstrates a PDF chatbot utilizing Upstash's RAGChat and OpenAI's
 
 ### Prerequisites
 
-* npm or yarn for installing dependencies
+* npm or yarn to install dependencies
 * Upstash and OpenAI API keys
 
 ### Installation
