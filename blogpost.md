@@ -117,7 +117,7 @@ const handleFileChange = async (
  setFileUrl(URL.createObjectURL(selectedPdf))
  }
  }
- ```
+```
 3- This function is the most important one. It handles the file upload and sends the file to the `/api/pdf-extractor` endpoint. After getting the response, it sets the file uploading flag to true and creates a default message for the chatbot. If anything unusual happens, the corresponding error message is shown to the user.
 ```typescript
  async function handleUpload() {
@@ -132,7 +132,7 @@ const handleFileChange = async (
 
  const response = await fetch('/api/pdf-extractor', {
  method: 'POST',
- body: JSON.stringify({ data: Array.from(uint8Array) }),
+ body: JSON.stringify({ data: Array from(uint8Array) }),
  headers: {
  'Content-Type': 'application/json',
  'req-type': 'fileUpload',
@@ -238,7 +238,7 @@ const handleFileChange = async (
  </div>
  </div>
  )
-}
+ }
 ```
 
 ## Functionality of Upstash RAGChat
