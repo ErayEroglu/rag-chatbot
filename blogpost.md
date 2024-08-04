@@ -66,7 +66,8 @@ async function extractTextFromPDF(data: number[]): Promise<string> {
  pdfText = pdfText.replace(/[^
 {L}
 {N}]/gu, ' ')
- pdfText = pdfText.replace(/\s+/g, ' ').trim()
+ pdfText = pdfText.replace(/
++/g, ' ').trim()
  return pdfText
 }
 ```
@@ -122,7 +123,7 @@ const handleFileChange = async (
  async function handleUpload() {
  if (fileUrl && !isFileUploaded) {
  setMsg('Uploading...')
- 
+
  // Fetch the file and extract the text
  const responseToBlob = await fetch(fileUrl)
  const blob = await responseToBlob.blob()
@@ -131,7 +132,7 @@ const handleFileChange = async (
 
  const response = await fetch('/api/pdf-extractor', {
  method: 'POST',
- body: JSON.stringify({ data: Array from(uint8Array) }),
+ body: JSON.stringify({ data: Array.from(uint8Array) }),
  headers: {
  'Content-Type': 'application/json',
  'req-type': 'fileUpload',
