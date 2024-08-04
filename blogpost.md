@@ -158,7 +158,7 @@ const handleFileChange = async (
  }
  }
 ```
-4- The last part is mostly about UI. It is not a complex design, yet it is effective and useful.
+4- The last part is mostly about UI. It is not a complex design, yet it is effective and useful. 
 ```typescript
  return (
  <div className="flex flex-col items-center justify-center h-screen">
@@ -233,6 +233,7 @@ const handleFileChange = async (
  Send
  </Button>
  </form>
+ </div>
  </div>
  </div>
  </div>
