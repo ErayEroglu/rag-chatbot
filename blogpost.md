@@ -105,7 +105,7 @@ const { messages, input, handleInputChange, handleSubmit, setMessages } =
  })
 ```
 
-2 - This function sets the file url. It will be used in file upload and text extraction.
+2 - This function sets the file URL. It will be used in file upload and text extraction.
 ```typescript
 const handleFileChange = async (
  event: React.ChangeEvent<HTMLInputElement>
@@ -132,7 +132,7 @@ const handleFileChange = async (
 
  const response = await fetch('/api/pdf-extractor', {
  method: 'POST',
- body: JSON.stringify({ data: Array from(uint8Array) }),
+ body: JSON.stringify({ data: Array.from(uint8Array) }),
  headers: {
  'Content-Type': 'application/json',
  'req-type': 'fileUpload',
