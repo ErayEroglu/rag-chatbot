@@ -105,7 +105,7 @@ const { messages, input, handleInputChange, handleSubmit, setMessages } =
  })
 ```
 
-2 - This function sets the file url. It will be used in file upload and text extraction.
+2 - This function sets the file URL. It will be used in file upload and text extraction.
 ```typescript
 const handleFileChange = async (
  event: React.ChangeEvent<HTMLInputElement>
@@ -156,9 +156,9 @@ const handleFileChange = async (
  } else {
  console.log('No file selected')
  }
- }
+}
 ```
-4- The last part is mostly about UI. It is not a complex design, yet it is effective and useful. 
+4- The last part is mostly about UI. It is not a complex design, yet it is effective and useful.
 ```typescript
  return (
  <div className="flex flex-col items-center justify-center h-screen">
@@ -238,7 +238,7 @@ const handleFileChange = async (
  </div>
  </div>
  )
- }
+}
 ```
 
 ## Functionality of Upstash RAGChat
